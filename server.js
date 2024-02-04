@@ -1,13 +1,13 @@
+// server.js
+
 const express = require("express");
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 const sqlite3 = require("sqlite3").verbose();
-// const db = new sqlite3.Database("path/to/your/database.sqlite");
 
-// const db = new sqlite3.Database("dua_main.sqlite");
-
-let db = new sqlite3.Database(
-  "./dua_main.sqlite",
+// Update this line to use environment variable for the database path
+const db = new sqlite3.Database(
+  process.env.DATABASE_PATH,
   sqlite3.OPEN_READONLY,
   (err) => {
     if (err) {
@@ -34,8 +34,6 @@ app.get("/sub_category/:cat_id", (req, res) => {
 
   db.all(
     `SELECT * FROM sub_category WHERE cat_id = ${categoryId}`,
-    // "SELECT * FROM sub_category WHERE category_id = ?"
-    // [categoryId],
     (err, rows) => {
       if (err) {
         res.status(500).json({ error: err.message });
@@ -49,17 +47,13 @@ app.get("/sub_category/:cat_id", (req, res) => {
 // API endpoint to get duas for a given subcategory
 app.get("/dua/:id", (req, res) => {
   const duaId = req.params.id;
-  db.all(
-    `SELECT * FROM dua WHERE id = ${duaId}`,
-    // [subcategoryId],
-    (err, rows) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      res.json(rows);
+  db.all(`SELECT * FROM dua WHERE id = ${duaId}`, (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
     }
-  );
+    res.json(rows);
+  });
 });
 
 app.get("/", (req, res, next) => {
