@@ -1,9 +1,12 @@
 // server.js
 
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
 const sqlite3 = require("sqlite3").verbose();
+
+app.use(cors());
 
 // Update this line to use environment variable for the database path
 const db = new sqlite3.Database(
