@@ -1,5 +1,5 @@
 const express = require("express");
-const app = express();
+export const app = express();
 const port = 8000;
 const sqlite3 = require("sqlite3").verbose();
 // const cors = require("cors");
