@@ -1,6 +1,6 @@
 const express = require("express");
 const sqlite = require("sqlite3");
-const cors = require("cors");
+// const cors = require("cors");
 
 const app = express();
 
@@ -17,7 +17,7 @@ const withDB = async (req, res, next) => {
 };
 
 // Enable CORS for all routes
-app.use(cors());
+// app.use(cors());
 
 // API endpoint to get categories
 app.get("/api/category", withDB, async (req, res) => {
