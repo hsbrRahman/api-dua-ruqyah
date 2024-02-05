@@ -2,12 +2,12 @@ const express = require("express");
 export const app = express();
 const port = 8000;
 const sqlite3 = require("sqlite3").verbose();
-// const cors = require("cors");
-// app.use(
-//   cors({
-//     origin: "*",
-//   })
-// );
+const cors = require("cors");
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 // const db = new sqlite3.Database("path/to/your/database.sqlite");
 
 // const db = new sqlite3.Database("dua_main.sqlite");
@@ -101,3 +101,5 @@ app.get("/", (req, res, next) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+module.exports = app;
