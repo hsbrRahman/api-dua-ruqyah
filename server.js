@@ -1,72 +1,103 @@
 const express = require("express");
-const sqlite = require("sqlite3");
-// const cors = require("cors");
-
 const app = express();
+const port = 8000;
+const sqlite3 = require("sqlite3").verbose();
+// const cors = require("cors");
+// app.use(
+//   cors({
+//     origin: "*",
+//   })
+// );
+// const db = new sqlite3.Database("path/to/your/database.sqlite");
 
-// Middleware to handle database connection
-const withDB = async (req, res, next) => {
-  const db = await sqlite.open({
-    filename: "./dua_main.sqlite",
-    driver: sqlite3.Database,
-    mode: sqlite3.OPEN_READONLY,
-  });
+// const db = new sqlite3.Database("dua_main.sqlite");
 
-  req.db = db; // Attach the database to the request object
-  next();
-};
-
-// Enable CORS for all routes
-// app.use(cors());
+let db = new sqlite3.Database(
+  "./db/dua_main.sqlite",
+  sqlite3.OPEN_READONLY,
+  (err) => {
+    if (err) {
+      console.error(err.message);
+    }
+    console.log("Connected to the dua_main database.");
+  }
+);
 
 // API endpoint to get categories
-app.get("/api/category", withDB, async (req, res) => {
-  try {
-    const rows = await req.db.all("SELECT * FROM category");
+app.get("/category", (req, res) => {
+  db.all("SELECT * FROM category", (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
     res.json(rows);
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: error.message });
-  } finally {
-    await req.db.close();
-  }
+  });
+});
+app.get("/category/:cat_id", (req, res) => {
+  const categoryId = req.params.cat_id;
+
+  db.all(`SELECT * FROM category WHERE cat_id = ${categoryId}`, (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(rows);
+  });
 });
 
 // API endpoint to get subcategories for a given category
-app.get("/api/sub_category/:cat_id", withDB, async (req, res) => {
+app.get("/sub_category/:cat_id", (req, res) => {
   const categoryId = req.params.cat_id;
 
-  try {
-    const rows = await req.db.all(
-      "SELECT * FROM sub_category WHERE cat_id = ?",
-      [categoryId]
-    );
-    res.json(rows);
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: error.message });
-  } finally {
-    await req.db.close();
-  }
+  db.all(
+    `SELECT * FROM sub_category WHERE cat_id = ${categoryId}`,
+    // "SELECT * FROM sub_category WHERE category_id = ?"
+    // [categoryId],
+    (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json(rows);
+    }
+  );
 });
 
 // API endpoint to get duas for a given subcategory
-app.get("/api/dua/:id", withDB, async (req, res) => {
+app.get("/dua/:id", (req, res) => {
   const duaId = req.params.id;
-
-  try {
-    const rows = await req.db.all("SELECT * FROM dua WHERE id = ?", [duaId]);
-    res.json(rows);
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: error.message });
-  } finally {
-    await req.db.close();
-  }
+  db.all(
+    `SELECT * FROM dua WHERE cat_id = ${duaId}`,
+    // [subcategoryId],
+    (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json(rows);
+    }
+  );
+});
+app.get("/dua/", (req, res) => {
+  // const duaId = req.params.id;
+  db.all(
+    "SELECT * FROM dua ",
+    // [subcategoryId],
+    (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json(rows);
+    }
+  );
 });
 
-app.get("/api", (req, res, next) => {
+app.get("/", (req, res, next) => {
   res.json({ message: "OK" });
 });
 
-module.exports = app;
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
